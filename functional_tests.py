@@ -2,12 +2,17 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
 import unittest
+import os
 
 
 class NewVisitorTest(unittest.TestCase):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
+        staging_server = os.environ.get('STAGING_SERVER')
+        if staging_server:
+            self.live_server_url = 'http://' + staging_server#https?
+            print('!', self.live_server_url)
         #self.browser.implicitly_wait(10)
 
     def tearDown(self):
@@ -19,7 +24,7 @@ class NewVisitorTest(unittest.TestCase):
         self.assertIn(row_text, [row.text for row in rows])
 
     def est_can_start_a_list_for_one_user(self):
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url + ':8000')
         self.assertIn('To-Do', self.browser.title)
         header_text = self.browser.find_element_by_tag_name('h1').text
         self.assertIn('To-Do', header_text)
@@ -45,7 +50,7 @@ class NewVisitorTest(unittest.TestCase):
         self.fail('Finish the test!')
 
     def est_multiple_users_can_start_lists_at_different_urls(self):
-        self.browser.get('http://localhost:8000/')
+        self.browser.get(self.live_server_url + ':8000')
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys('Buy peacock feathers')
         #inputbox.send_keys(Keys.ENTER)
@@ -58,7 +63,7 @@ class NewVisitorTest(unittest.TestCase):
         self.browser.quit()
         self.browser = webdriver.Firefox()
 
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url + ':8000')
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertNotIn('make a fly', page_text)
@@ -77,7 +82,7 @@ class NewVisitorTest(unittest.TestCase):
         self.assertIn('Buy milk', page_text)
 
     def test_layout_and_styling(self):
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url + ':8000')
         self.browser.set_window_size(1024, 768)
 
         inputbox = self.browser.find_element_by_id('id_new_item')
